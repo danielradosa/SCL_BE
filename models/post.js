@@ -4,10 +4,10 @@ const Schema = mongoose.Schema;
 
 // POST SCHEMA
 const postSchema = new Schema({
-    title: String,
-    content: String,
-    postImageURL: String,
-    postedBy: String
+    title: { type: String, required: true },
+    content: { type: String, required: true },
+    postImageURL: { type: String, required: false },
+    postedBy: { type: String, required: true },
 });
 
 // MODEL EXPORT

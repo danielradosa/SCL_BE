@@ -3,6 +3,10 @@ const graphql = require('graphql');
 const _ = require('lodash');
 const { GraphQLObjectType, GraphQLString, GraphQLSchema, GraphQLID, GraphQLInt, GraphQLList } = graphql;
 
+// Models
+const User = require('../models/user');
+const Post = require('../models/post');
+
 // Define Types
 const UserType = new GraphQLObjectType({
     name: 'User',
@@ -17,7 +21,7 @@ const UserType = new GraphQLObjectType({
         posts: {
             type: new GraphQLList(PostType),
             resolve(parent, args) {
-                //return _.filter(posts, { postedBy: parent.handle });
+                return Post.find({ postedBy: parent.id });
             }
         }
     })
@@ -33,7 +37,7 @@ const PostType = new GraphQLObjectType({
         postedBy: {
             type: UserType,
             resolve(parent, args) {
-                //return _.find(user, { handle: parent.postedBy });
+                return User.findOne({ id: parent.postedBy });
             }
         }
     })
@@ -41,38 +45,87 @@ const PostType = new GraphQLObjectType({
 
 
 // Queries
-const RootQuery = new GraphQLObjectType({
-    name: 'RootQueryType',
+const Queries = new GraphQLObjectType({
+    name: 'Queries',
     fields: {
         getUserById: {
             type: UserType,
             args: { id: { type: GraphQLID } },
             resolve(parent, args) {
-                //return _.find(user, { id: args.id });
+                return User.findById(args.id);
             }
         },
         getPostById: {
             type: PostType,
             args: { id: { type: GraphQLID } },
             resolve(parent, args) {
-                //return _.find(posts, { id: args.id });
+                return Post.findById(args.id);
             }
         },
         getAllUsers: {
             type: new GraphQLList(UserType),
             resolve(parent, args) {
-                //return user;
+                return User.find({});
             }
         },
         getAllPosts: {
             type: new GraphQLList(PostType),
             resolve(parent, args) {
-                //return posts;
+                return Post.find({});
             }
         }
     }
 });
 
+// Mutations
+const Mutations = new GraphQLObjectType({
+    name: 'Mutations',
+    fields: {
+        registerUser: {
+            type: UserType,
+            args: {
+                username: { type: GraphQLString },
+                email: { type: GraphQLString },
+                handle: { type: GraphQLString },
+                password: { type: GraphQLString },
+                following: { type: GraphQLInt },
+                followers: { type: GraphQLInt }
+            },
+            resolve(parent, args) {
+                let user = new User({
+                    username: args.username,
+                    email: args.email,
+                    handle: args.handle,
+                    password: args.password,
+                    following: args.following,
+                    followers: args.followers
+                });
+                return user.save();
+            }
+        },
+        createPost: {
+            type: PostType,
+            args: {
+                title: { type: GraphQLString },
+                content: { type: GraphQLString },
+                postImageURL: { type: GraphQLString },
+                postedBy: { type: GraphQLString }
+            },
+            resolve(parent, args) {
+                let post = new Post({
+                    title: args.title,
+                    content: args.content,
+                    postImageURL: args.postImageURL,
+                    postedBy: args.postedBy
+                });
+                return post.save();
+            }
+
+        }
+    }
+});
+
 module.exports = new GraphQLSchema({
-    query: RootQuery
+    query: Queries,
+    mutation: Mutations
 });
