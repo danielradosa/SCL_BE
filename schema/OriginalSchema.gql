@@ -1,0 +1,134 @@
+type User {
+    username: String! 
+    email: String!
+    handle: String! @id
+    password: String!
+    profilePictureURL: String
+    createdAt: DateTime
+    posts: [Post!] @hasInverse(field: postedBy)
+    following: Int!
+    followers: Int!
+    bio: Bio
+}
+
+type Follower {
+    follower: User! @relation(name: "FOLLOWER", onDelete: CASCADE)
+    following: User! @relation(name: "FOLLOWING", onDelete: CASCADE)
+}
+
+type Bio {
+    id: ID! @id
+    who: User! @hasInverse(field: handle)
+    body: String
+    website: String
+    location: String
+}
+
+type Post {
+    id: ID!
+    title: String!
+    body: String!
+    postImageURL: [String]
+    createdAt: DateTime
+    postedBy: User!
+    likes: Int!
+    comments: [Comment!] @hasInverse(field: commentedOn)
+}
+
+type Comment {
+    id: ID!
+    body: String!
+    createdAt: DateTime
+    commentedOn: Post!
+    commentedBy: User!
+}
+
+type Like {
+    id: ID!
+    createdAt: DateTime
+    likedBy: User!
+    likedOn: Post!
+}
+
+type SubscriptionType {
+    postAdded: Post
+    commentAdded: Comment
+    likeAdded: Like
+}
+
+input PostInput {
+    title: String!
+    body: String!
+    postImageURL: [String]
+    postedBy: String!
+}
+
+input CommentInput {
+    body: String!
+    commentedOn: ID!
+    commentedBy: String!
+    timestamp: DateTime!
+}
+
+input LikeInput {
+    likedOn: ID!
+    likedBy: String!
+}
+
+input LoginInput {
+  	email: String!
+    password: String!
+}
+
+input RegisterInput {
+    username: String!
+    email: String!
+    handle: String!
+    password: String!
+}
+
+input UpdateUsersInput {
+    username: String
+    email: String
+    password: String
+}
+
+input UpdateBioInput {
+    body: String
+    website: String
+    location: String
+}
+
+input UpdateProfilePictureInput {
+    profilePictureURL: String
+}
+
+type Query {
+    getPosts: [Post!]!
+    getPost(postId: ID!): Post!
+    getComments(postId: ID!): [Comment!]!
+    getLikes(postId: ID!): [Like!]!
+    getFollowers(handle: String!): [Follower!]!
+    getFollowing(handle: String!): [Follower!]!
+    getBio(handle: String!): Bio!
+    getUser(handle: String!): User!
+    getUsers: [User!]!
+    getNotifications: [Notification!]!
+}
+
+type Mutation {
+    createPost(postInput: PostInput): Post!
+    createComment(commentInput: CommentInput): Comment!
+    createLike(likeInput: LikeInput): Like!
+    followUser(handle: String!): Follower!
+    unfollowUser(handle: String!): Follower!
+    updateUsers(updateUsersInput: UpdateUsersInput): User!
+    updateBio(updateBioInput: UpdateBioInput): Bio!
+    updateProfilePicture(updateProfilePictureInput: UpdateProfilePictureInput): User!
+    deletePost(postId: ID!): Post!
+    deleteComment(commentId: ID!): Comment!
+    deleteLike(likeId: ID!): Like!
+    deleteNotification(notificationId: ID!): Notification!
+    login(loginInput: LoginInput): User!
+    register(registerInput: RegisterInput): User!
+}
