@@ -11,6 +11,11 @@ type User {
     bio: Bio
 }
 
+type Login {
+    email: User.email!
+    password: User.password!
+}
+
 type Follower {
     follower: User! @relation(name: "FOLLOWER", onDelete: CASCADE)
     following: User! @relation(name: "FOLLOWING", onDelete: CASCADE)

@@ -1,12 +1,34 @@
 // Imports
 const graphql = require('graphql');
 const _ = require('lodash');
+const hash = require('argon2').hash;
+const verify = require('argon2').verify;
+const jwt = require('jsonwebtoken');
 const { GraphQLObjectType, GraphQLString, GraphQLSchema, GraphQLID, GraphQLInt, GraphQLList } = graphql;
+
+// Import hashing and token functions
+const hashPassword = async (password) => {
+    return await hash(password);
+};
+
+const verifyPassword = async (hash, password) => {
+    return await verify(hash, password);
+};
+
+const signToken = (data) => {
+    return jwt.sign(data, process.env.JWT_SECRET);
+};
+
+const verifyToken = (token) => {
+    return jwt.verify(token, process.env.JWT_SECRET);
+};
+
 
 // Models
 const User = require('../models/user');
 const Post = require('../models/post');
 const Bio = require('../models/bio');
+const Login = require('../models/login');
 
 // Define Types
 const UserType = new GraphQLObjectType({
@@ -31,6 +53,16 @@ const UserType = new GraphQLObjectType({
                 return Post.find({ postedBy: parent.id });
             }
         }
+    })
+});
+
+const LoginType = new GraphQLObjectType({
+    name: 'Login',
+    fields: () => ({
+        id: { type: GraphQLID },
+        email: { type: GraphQLString },
+        password: { type: GraphQLString },
+        token: { type: GraphQLString }
     })
 });
 
@@ -111,26 +143,46 @@ const Queries = new GraphQLObjectType({
 const Mutations = new GraphQLObjectType({
     name: 'Mutations',
     fields: {
-        registerUser: {
+        // register user with hashed password
+        register: {
             type: UserType,
             args: {
                 username: { type: GraphQLString },
                 email: { type: GraphQLString },
                 handle: { type: GraphQLString },
-                password: { type: GraphQLString },
-                following: { type: GraphQLInt },
-                followers: { type: GraphQLInt }
+                password: { type: GraphQLString }
             },
-            resolve(parent, args) {
-                let user = new User({
+            async resolve(parent, args) {
+                const hashedPassword = await hashPassword(args.password);
+                const user = new User({
                     username: args.username,
                     email: args.email,
                     handle: args.handle,
-                    password: args.password,
-                    following: args.following,
-                    followers: args.followers
+                    password: hashedPassword
                 });
-                return user.save();
+                // return user and sign token
+                return user.save().then((user) => {
+                    return signToken({ id: user.id });
+                });
+            }
+        },
+        login: {
+            type: LoginType,
+            args: {
+                email: { type: GraphQLString },
+                password: { type: GraphQLString },
+                token: { type: GraphQLString }
+            },
+            async resolve(parent, args) {
+                // find user by email
+                const user = await User.findOne({ email: args.email });
+                // verify password
+                const passwordMatch = await verifyPassword(user.password, args.password);
+                // if password matches, sign token
+                if (passwordMatch) {
+                    const token = signToken({ id: user.id });
+                    return { email: user.email, password: user.password, token: token };
+                }
             }
         },
         createBio: {
