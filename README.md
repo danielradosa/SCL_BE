@@ -1,7 +1,6 @@
 # SCL_BE
 ### Installation & Development
 
-<<<<<<< HEAD
 - Installation : `npm install` or `npm i`  <br />
 - Development : `nodemon app` for development
 
