@@ -10,6 +10,7 @@ const userSchema = new Schema({
     password: { type: String, required: true },
     following: { type: Number, required: false },
     followers: { type: Number, required: false },
+    bio: { type: String, required: false },
     posts: [{
         type: Schema.Types.ObjectId,
         ref: 'Post'

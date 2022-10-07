@@ -6,6 +6,7 @@ const { GraphQLObjectType, GraphQLString, GraphQLSchema, GraphQLID, GraphQLInt, 
 // Models
 const User = require('../models/user');
 const Post = require('../models/post');
+const Bio = require('../models/bio');
 
 // Define Types
 const UserType = new GraphQLObjectType({
@@ -18,12 +19,34 @@ const UserType = new GraphQLObjectType({
         password: { type: GraphQLString },
         following: { type: GraphQLInt },
         followers: { type: GraphQLInt },
+        bio: {
+            type: BioType,
+            resolve(parent, args) {
+                return Bio.find({ id: parent.id });
+            }
+        },
         posts: {
             type: new GraphQLList(PostType),
             resolve(parent, args) {
                 return Post.find({ postedBy: parent.id });
             }
         }
+    })
+});
+
+const BioType = new GraphQLObjectType({
+    name: 'Bio',
+    fields: () => ({
+        id: { type: GraphQLID },
+        who: {
+            type: UserType,
+            resolve(parent, args) {
+                return User.findById(parent.who);
+            }
+        },
+        body: { type: GraphQLString },
+        website: { type: GraphQLString },
+        location: { type: GraphQLString }
     })
 });
 
@@ -53,6 +76,13 @@ const Queries = new GraphQLObjectType({
             args: { id: { type: GraphQLID } },
             resolve(parent, args) {
                 return User.findById(args.id);
+            }
+        },
+        getBioByUserId: {
+            type: BioType,
+            args: { id: { type: GraphQLID } },
+            resolve(parent, args) {
+                return Bio.findOne({ who: args.id });
             }
         },
         getPostById: {
@@ -101,6 +131,24 @@ const Mutations = new GraphQLObjectType({
                     followers: args.followers
                 });
                 return user.save();
+            }
+        },
+        createBio: {
+            type: BioType,
+            args: {
+                who: { type: GraphQLID },
+                body: { type: GraphQLString },
+                website: { type: GraphQLString },
+                location: { type: GraphQLString }
+            },
+            resolve(parent, args) {
+                let bio = new Bio({
+                    who: args.who,
+                    body: args.body,
+                    website: args.website,
+                    location: args.location
+                });
+                return bio.save();
             }
         },
         createPost: {
