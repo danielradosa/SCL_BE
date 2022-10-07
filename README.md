@@ -1,7 +1,7 @@
 # SCL_BE
 ### Installation & Development
 
-- Installation : `npm install` or `npm i`  <br />
+- Installation : `npm install` or `npm i`  (if you get ERESOLVE error just add this `--legacy-peer-deps`)<br />
 - Development : `nodemon app` for development
 
 #### Tech-Stack
