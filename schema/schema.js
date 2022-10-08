@@ -11,7 +11,7 @@ const {
 } = graphql;
 
 // Import hashing and token functions
-const { hashPassword, verifyPassword, signToken, verifyToken } = require('../utils');
+const { hashPassword, verifyPassword, signToken } = require('../utils');
 
 // Import models
 const { User, Post, Bio, Login } = require('../models');
@@ -204,9 +204,8 @@ const Mutations = new GraphQLObjectType({
                     postImageURL: args.postImageURL,
                     postedBy: args.postedBy
                 });
-                return post.save();
+                 return post.save();
             }
-
         }
     }
 });
