@@ -1,36 +1,22 @@
 // Imports
 const graphql = require('graphql');
 const _ = require('lodash');
-const hash = require('argon2').hash;
-const verify = require('argon2').verify;
-const jwt = require('jsonwebtoken');
-const { GraphQLObjectType, GraphQLString, GraphQLSchema, GraphQLID, GraphQLInt, GraphQLList } = graphql;
+const { 
+    GraphQLObjectType, 
+    GraphQLString, 
+    GraphQLSchema, 
+    GraphQLID, 
+    GraphQLInt, 
+    GraphQLList 
+} = graphql;
 
 // Import hashing and token functions
-const hashPassword = async (password) => {
-    return await hash(password);
-};
+const { hashPassword, verifyPassword, signToken, verifyToken } = require('../utils');
 
-const verifyPassword = async (hash, password) => {
-    return await verify(hash, password);
-};
+// Import models
+const { User, Post, Bio, Login } = require('../models');
 
-const signToken = (data) => {
-    return jwt.sign(data, process.env.JWT_SECRET);
-};
-
-const verifyToken = (token) => {
-    return jwt.verify(token, process.env.JWT_SECRET);
-};
-
-
-// Models
-const User = require('../models/user');
-const Post = require('../models/post');
-const Bio = require('../models/bio');
-const Login = require('../models/login');
-
-// Define Types
+// Define types
 const UserType = new GraphQLObjectType({
     name: 'User',
     fields: () => ({
@@ -143,7 +129,6 @@ const Queries = new GraphQLObjectType({
 const Mutations = new GraphQLObjectType({
     name: 'Mutations',
     fields: {
-        // register user with hashed password
         register: {
             type: UserType,
             args: {
@@ -160,7 +145,6 @@ const Mutations = new GraphQLObjectType({
                     handle: args.handle,
                     password: hashedPassword
                 });
-                // return user and sign token
                 return user.save().then((user) => {
                     return signToken({ id: user.id });
                 });
@@ -174,12 +158,14 @@ const Mutations = new GraphQLObjectType({
                 token: { type: GraphQLString }
             },
             async resolve(parent, args) {
-                // find user by email
                 const user = await User.findOne({ email: args.email });
-                // verify password
+                if (!user) {
+                    throw new Error('User does not exist');
+                }
                 const passwordMatch = await verifyPassword(user.password, args.password);
-                // if password matches, sign token
-                if (passwordMatch) {
+                if (!passwordMatch) {
+                    throw new Error('Incorrect password');
+                } else {
                     const token = signToken({ id: user.id });
                     return { email: user.email, password: user.password, token: token };
                 }
