@@ -74,7 +74,7 @@ const PostType = new GraphQLObjectType({
         id: { type: GraphQLID },
         title: { type: GraphQLString },
         content: { type: GraphQLString },
-        postImageURL: { type: GraphQLString },
+        postImage: { type: GraphQLString },
         postedBy: {
             type: UserType,
             resolve(parent, args) {
@@ -145,9 +145,13 @@ const Mutations = new GraphQLObjectType({
                     handle: args.handle,
                     password: hashedPassword
                 });
-                return user.save().then((user) => {
-                    return signToken({ id: user.id });
-                });
+                // Check if user with email or handle already exists
+                const userExists = await User.findOne({ $or: [{ email: args.email }, { handle: args.handle }] });
+                if (userExists) {
+                    throw new Error('User with such handle or email already exists. Please choose another email or handle.');
+                } else {
+                    return user.save();
+                }
             }
         },
         login: {
@@ -186,7 +190,13 @@ const Mutations = new GraphQLObjectType({
                     website: args.website,
                     location: args.location
                 });
-                return bio.save();
+                // Check if user has already created a bio
+                const bioExists = Bio.findOne({ who: args.who });
+                if (bioExists) {
+                    throw new Error('User has already created a bio. If you are the creator, you can update your bio instead.');
+                } else {
+                    return bio.save();
+                }
             }
         },
         createPost: {
@@ -194,14 +204,14 @@ const Mutations = new GraphQLObjectType({
             args: {
                 title: { type: GraphQLString },
                 content: { type: GraphQLString },
-                postImageURL: { type: GraphQLString },
+                postImage: { type: GraphQLString },
                 postedBy: { type: GraphQLString }
             },
             resolve(parent, args) {
                 let post = new Post({
                     title: args.title,
                     content: args.content,
-                    postImageURL: args.postImageURL,
+                    postImage: args.postImageURL,
                     postedBy: args.postedBy
                 });
                  return post.save();
