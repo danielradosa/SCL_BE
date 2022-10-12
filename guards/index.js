@@ -1,4 +1,4 @@
-// Imports
+/* // Imports
 const shield = require('graphql-shield').shield;
 const isAuthorized = require('./rules/isAuthorized.js');
 
@@ -8,4 +8,4 @@ module.exports = shield({
         createPost: isAuthorized,
         createBio: isAuthorized,
     }
-});
+}); */

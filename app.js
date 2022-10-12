@@ -1,7 +1,6 @@
 const express = require('express');
 const { graphqlHTTP } = require('express-graphql');
 const schema = require('./schema/schema');
-// const authorization = require('./guards');
 const mongoose = require('mongoose');
 
 require('dotenv').config();
@@ -9,7 +8,6 @@ require('dotenv').config();
 const port = process.env.PORT || 1000;
 const db_url = process.env.MONGO_DB;
 const app = express();
-// const authorizedSchema = authorization(schema);
 
 mongoose.connect(db_url, { useNewUrlParser: true, useUnifiedTopology: true });
 mongoose.connection.once('open', () => {
@@ -17,7 +15,7 @@ mongoose.connection.once('open', () => {
 });
 
 app.use('/graphql', graphqlHTTP({
-    schema, //authorizedSchema,
+    schema,
     graphiql: true
 }));
 

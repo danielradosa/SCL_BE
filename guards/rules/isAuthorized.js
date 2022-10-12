@@ -1,10 +1,10 @@
-// Imports
+/* // Imports
 const rule = require('graphql-shield').rule;
 const verifyToken = require('../../utils').verifyToken;
 
 // Function to verify token
 const isAuthorized = rule()(async (parent, args, ctx, info) => {
-  const { authorization } = ctx.request.headers;
+  const authorization = ctx.request.headers;
   if (!authorization) {
     return false;
   }
@@ -17,4 +17,4 @@ const isAuthorized = rule()(async (parent, args, ctx, info) => {
 
 module.exports = {
     isAuthorized
-};
+}; */

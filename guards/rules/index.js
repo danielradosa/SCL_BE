@@ -1,5 +1,5 @@
-const isAuthorized = require('./rules/isAuthorized.js');
+/* const isAuthorized = require('./rules/isAuthorized.js');
 
 module.exports = {
     isAuthorized
-};
+}; */
