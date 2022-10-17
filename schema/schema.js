@@ -211,7 +211,7 @@ const Mutations = new GraphQLObjectType({
                 let post = new Post({
                     title: args.title,
                     content: args.content,
-                    postImage: args.postImageURL,
+                    postImage: args.postImage,
                     postedBy: args.postedBy
                 });
                  return post.save();
