@@ -150,7 +150,7 @@ const Mutations = new GraphQLObjectType({
                 if (userExists) {
                     throw new Error('User with such handle or email already exists. Please choose another email or handle.');
                 } else {
-                    return User.save();
+                    return user.save();
                 }
             }
         },
@@ -195,7 +195,7 @@ const Mutations = new GraphQLObjectType({
                 if (bioExists) {
                     throw new Error('User has already created a bio. If you are the creator, you can update your bio instead.');
                 } else {
-                    return Bio.save();
+                    return bio.save();
                 }
             }
         },
@@ -214,7 +214,7 @@ const Mutations = new GraphQLObjectType({
                     postImage: args.postImage,
                     postedBy: args.postedBy
                 });
-                 return Post.save();
+                 return post.save();
             }
         }
     }
