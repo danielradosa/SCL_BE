@@ -4,6 +4,7 @@
   "description": "SCL_BackEnd",
   "main": "app.js",
   "scripts": {
+    "install": "npm install --legacy-peer-deps",
     "start": "nodemon app"
   },
   "author": "Daniel Radosa",
