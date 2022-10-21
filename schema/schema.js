@@ -14,7 +14,7 @@ const {
 const { hashPassword, verifyPassword, signToken } = require('../utils');
 
 // Import models
-const { User, Post, Bio } = require('../models');
+const { user, post, bio } = require('../models');
 
 // Define types
 const UserType = new GraphQLObjectType({
@@ -30,13 +30,13 @@ const UserType = new GraphQLObjectType({
         bio: {
             type: BioType,
             resolve(parent, args) {
-                return Bio.find({ id: parent.id });
+                return bio.find({ id: parent.id });
             }
         },
         posts: {
             type: new GraphQLList(PostType),
             resolve(parent, args) {
-                return Post.find({ postedBy: parent.id });
+                return post.find({ postedBy: parent.id });
             }
         }
     })
@@ -59,7 +59,7 @@ const BioType = new GraphQLObjectType({
         who: {
             type: UserType,
             resolve(parent, args) {
-                return User.findById(parent.who);
+                return user.findById(parent.who);
             }
         },
         body: { type: GraphQLString },
@@ -78,7 +78,7 @@ const PostType = new GraphQLObjectType({
         postedBy: {
             type: UserType,
             resolve(parent, args) {
-                return User.findOne({ id: parent.postedBy });
+                return user.findOne({ id: parent.postedBy });
             }
         }
     })
@@ -93,33 +93,33 @@ const Queries = new GraphQLObjectType({
             type: UserType,
             args: { id: { type: GraphQLID } },
             resolve(parent, args) {
-                return User.findById(args.id);
+                return user.findById(args.id);
             }
         },
         getBioByUserId: {
             type: BioType,
             args: { id: { type: GraphQLID } },
             resolve(parent, args) {
-                return Bio.findOne({ who: args.id });
+                return bio.findOne({ who: args.id });
             }
         },
         getPostById: {
             type: PostType,
             args: { id: { type: GraphQLID } },
             resolve(parent, args) {
-                return Post.findById(args.id);
+                return post.findById(args.id);
             }
         },
         getAllUsers: {
             type: new GraphQLList(UserType),
             resolve(parent, args) {
-                return User.find({});
+                return user.find({});
             }
         },
         getAllPosts: {
             type: new GraphQLList(PostType),
             resolve(parent, args) {
-                return Post.find({});
+                return post.find({});
             }
         }
     }
@@ -146,7 +146,7 @@ const Mutations = new GraphQLObjectType({
                     password: hashedPassword
                 });
                 // Check if user with email or handle already exists
-                const userExists = await User.findOne({ $or: [{ email: args.email }, { handle: args.handle }] });
+                const userExists = await user.findOne({ $or: [{ email: args.email }, { handle: args.handle }] });
                 if (userExists) {
                     throw new Error('User with such handle or email already exists. Please choose another email or handle.');
                 } else {
@@ -191,7 +191,7 @@ const Mutations = new GraphQLObjectType({
                     location: args.location
                 });
                 // Check if user has already created a bio
-                const bioExists = Bio.findOne({ who: args.who });
+                const bioExists = bio.findOne({ who: args.who });
                 if (bioExists) {
                     throw new Error('User has already created a bio. If you are the creator, you can update your bio instead.');
                 } else {
