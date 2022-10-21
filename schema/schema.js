@@ -14,7 +14,7 @@ const {
 const { hashPassword, verifyPassword, signToken } = require('../utils');
 
 // Import models
-const { User, Post, Bio, Login } = require('../models');
+const { User, Post, Bio } = require('../models');
 
 // Define types
 const UserType = new GraphQLObjectType({
