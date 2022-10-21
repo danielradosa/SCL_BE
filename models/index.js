@@ -1,7 +1,7 @@
 // export all models
 module.exports = {
-    User: require('./User'),
-    Post: require('./Post'),
-    Bio: require('./Bio'),
-    Login: require('./Login')
+    User: require('./user'),
+    Post: require('./post'),
+    Bio: require('./bio'),
+    Login: require('./login')
 };
