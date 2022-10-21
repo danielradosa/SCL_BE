@@ -14,7 +14,7 @@ const {
 const { hashPassword, verifyPassword, signToken } = require('../utils');
 
 // Import models
-const { user, post, bio } = require('../models');
+const { User, Post, Bio } = require('../models');
 
 // Define types
 const UserType = new GraphQLObjectType({
@@ -30,13 +30,13 @@ const UserType = new GraphQLObjectType({
         bio: {
             type: BioType,
             resolve(parent, args) {
-                return bio.find({ id: parent.id });
+                return Bio.find({ id: parent.id });
             }
         },
         posts: {
             type: new GraphQLList(PostType),
             resolve(parent, args) {
-                return post.find({ postedBy: parent.id });
+                return Post.find({ postedBy: parent.id });
             }
         }
     })
@@ -59,7 +59,7 @@ const BioType = new GraphQLObjectType({
         who: {
             type: UserType,
             resolve(parent, args) {
-                return user.findById(parent.who);
+                return User.findById(parent.who);
             }
         },
         body: { type: GraphQLString },
@@ -78,7 +78,7 @@ const PostType = new GraphQLObjectType({
         postedBy: {
             type: UserType,
             resolve(parent, args) {
-                return user.findOne({ id: parent.postedBy });
+                return User.findOne({ id: parent.postedBy });
             }
         }
     })
@@ -93,33 +93,33 @@ const Queries = new GraphQLObjectType({
             type: UserType,
             args: { id: { type: GraphQLID } },
             resolve(parent, args) {
-                return user.findById(args.id);
+                return User.findById(args.id);
             }
         },
         getBioByUserId: {
             type: BioType,
             args: { id: { type: GraphQLID } },
             resolve(parent, args) {
-                return bio.findOne({ who: args.id });
+                return Bio.findOne({ who: args.id });
             }
         },
         getPostById: {
             type: PostType,
             args: { id: { type: GraphQLID } },
             resolve(parent, args) {
-                return post.findById(args.id);
+                return Post.findById(args.id);
             }
         },
         getAllUsers: {
             type: new GraphQLList(UserType),
             resolve(parent, args) {
-                return user.find({});
+                return User.find({});
             }
         },
         getAllPosts: {
             type: new GraphQLList(PostType),
             resolve(parent, args) {
-                return post.find({});
+                return Post.find({});
             }
         }
     }
@@ -146,11 +146,11 @@ const Mutations = new GraphQLObjectType({
                     password: hashedPassword
                 });
                 // Check if user with email or handle already exists
-                const userExists = await user.findOne({ $or: [{ email: args.email }, { handle: args.handle }] });
+                const userExists = await User.findOne({ $or: [{ email: args.email }, { handle: args.handle }] });
                 if (userExists) {
                     throw new Error('User with such handle or email already exists. Please choose another email or handle.');
                 } else {
-                    return user.save();
+                    return User.save();
                 }
             }
         },
@@ -195,7 +195,7 @@ const Mutations = new GraphQLObjectType({
                 if (bioExists) {
                     throw new Error('User has already created a bio. If you are the creator, you can update your bio instead.');
                 } else {
-                    return bio.save();
+                    return Bio.save();
                 }
             }
         },
@@ -214,7 +214,7 @@ const Mutations = new GraphQLObjectType({
                     postImage: args.postImage,
                     postedBy: args.postedBy
                 });
-                 return post.save();
+                 return Post.save();
             }
         }
     }
