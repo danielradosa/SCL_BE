@@ -4,6 +4,9 @@
 - Installation : `npm install` or `npm i`  (if you get ERESOLVE error just add this `--legacy-peer-deps`)<br />
 - Development : `nodemon app` for development
 
+### Use without installation
+- API Endpoint: https://sclbe.herokuapp.com/graphql
+
 #### Tech-Stack
 1. GraphQL
 2. Mongoose
