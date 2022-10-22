@@ -6,6 +6,7 @@
 
 ### Use without installation
 - API Endpoint: https://sclbe.herokuapp.com/graphql
+- Sample Implenetation in React: https://codesandbox.io/s/scl-graphql-test-0gw19l?file=/src/index.js
 
 #### Tech-Stack
 1. GraphQL
