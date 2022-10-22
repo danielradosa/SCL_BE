@@ -18,7 +18,7 @@ app.use(express.json());
 
 app.use('/graphql', graphqlHTTP({
     schema,
-    graphiql: true
+    graphiql: false
 }));
 
 app.listen(port, () => {
