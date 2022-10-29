@@ -233,7 +233,11 @@ const Mutations = new GraphQLObjectType({
                 if (!user) {
                     throw new Error('User does not exist');
                 } else {
-                    const result = await cloudinary.uploader.upload("../SCL_BE/uploads/" + args.profilePicture);
+                    const path = require('path');
+                    const mainDir = path.join(__dirname, '../uploads/');
+                    filename = mainDir + args.profilePicture;
+
+                    const result = await cloudinary.uploader.upload(filename);
                     user.profilePicture = result.secure_url;
                     return user.save();
                 }
