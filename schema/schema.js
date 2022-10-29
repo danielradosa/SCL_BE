@@ -1,14 +1,17 @@
 // Imports
 const graphql = require('graphql');
+const cloudinary = require('cloudinary').v2;
 const _ = require('lodash');
-const { 
-    GraphQLObjectType, 
-    GraphQLString, 
-    GraphQLSchema, 
-    GraphQLID, 
-    GraphQLInt, 
-    GraphQLList 
+const {
+    GraphQLObjectType,
+    GraphQLString,
+    GraphQLSchema,
+    GraphQLID,
+    GraphQLInt,
+    GraphQLList
 } = graphql;
+
+
 
 // Import hashing and token functions
 const { hashPassword, verifyPassword, signToken } = require('../utils');
@@ -22,6 +25,7 @@ const UserType = new GraphQLObjectType({
     fields: () => ({
         id: { type: GraphQLID },
         username: { type: GraphQLString },
+        profilePicture: { type: GraphQLString },
         email: { type: GraphQLString },
         handle: { type: GraphQLString },
         password: { type: GraphQLString },
@@ -214,9 +218,27 @@ const Mutations = new GraphQLObjectType({
                     postImage: args.postImage,
                     postedBy: args.postedBy
                 });
-                 return post.save();
+                return post.save();
             }
-        }
+        },
+        // upload profile picture with cloudinary
+        uploadProfilePicture: {
+            type: UserType,
+            args: {
+                id: { type: GraphQLID },
+                profilePicture: { type: GraphQLString }
+            },
+            async resolve(parent, args) {
+                const user = await User.findById(args.id);
+                if (!user) {
+                    throw new Error('User does not exist');
+                } else {
+                    const result = await cloudinary.uploader.upload("../SCL_BE/uploads/" + args.profilePicture);
+                    user.profilePicture = result.secure_url;
+                    return user.save();
+                }
+            }
+        },
     }
 });
 
