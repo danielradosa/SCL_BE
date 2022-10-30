@@ -15,6 +15,8 @@ const app = express();
 // Definitions
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+// CORS
+app.use(cors());
 
 // Setup Cloudinary
 cloudinary.config({
@@ -22,9 +24,6 @@ cloudinary.config({
     api_key: process.env.API_KEY,
     api_secret: process.env.API_SECRET
 });
-
-// CORS
-app.use(cors());
 
 // Connect to MongoDB
 mongoose.connect(db_url, { useNewUrlParser: true, useUnifiedTopology: true });

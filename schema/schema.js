@@ -11,10 +11,8 @@ const {
     GraphQLList
 } = graphql;
 
-
-
 // Import hashing and token functions
-const { hashPassword, verifyPassword, signToken } = require('../utils');
+const { hashPassword, verifyPassword, signToken, verifyToken } = require('../utils');
 
 // Import models
 const { User, Post, Bio } = require('../models');
@@ -25,8 +23,9 @@ const UserType = new GraphQLObjectType({
     fields: () => ({
         id: { type: GraphQLID },
         username: { type: GraphQLString },
-        profilePicture: { type: GraphQLString },
         email: { type: GraphQLString },
+        password: { type: GraphQLString },
+        profilePicture: { type: GraphQLString },
         handle: { type: GraphQLString },
         following: { type: GraphQLInt },
         followers: { type: GraphQLInt },
@@ -95,6 +94,18 @@ const PostType = new GraphQLObjectType({
     })
 });
 
+// Subscriptions
+const SubscriptionType = new GraphQLObjectType({
+    name: 'Subscription',
+    fields: () => ({
+        postAdded: {
+            type: PostType,
+            resolve(parent, args) {
+                return parent;
+            }
+        }
+    })
+});
 
 // Queries
 const Queries = new GraphQLObjectType({
@@ -129,6 +140,7 @@ const Queries = new GraphQLObjectType({
         },
         getAllPosts: {
             type: new GraphQLList(PostType),
+            sort: { createdAt: -1 },
             resolve(parent, args) {
                 return Post.find({});
             }
@@ -159,7 +171,7 @@ const Mutations = new GraphQLObjectType({
                 // Check if user with email or handle already exists
                 const userExists = await User.findOne({ $or: [{ email: args.email }, { handle: args.handle }] });
                 if (userExists) {
-                    throw new Error('User with such handle or email already exists. Please choose another email or handle.');
+                    throw new Error('User with such handle or email already exists. Please choose another.');
                 } else {
                     return user.save();
                 }
@@ -230,7 +242,6 @@ const Mutations = new GraphQLObjectType({
                 return post.save();
             }
         },
-        // upload profile picture with cloudinary
         uploadProfilePicture: {
             type: UserType,
             args: {
@@ -245,7 +256,7 @@ const Mutations = new GraphQLObjectType({
                     const path = require('path');
                     const mainDir = path.join(__dirname, '../uploads/');
                     filename = mainDir + args.profilePicture;
-
+                    // upload profile picture with cloudinary
                     const result = await cloudinary.uploader.upload(filename);
                     user.profilePicture = result.secure_url;
                     return user.save();
@@ -257,5 +268,6 @@ const Mutations = new GraphQLObjectType({
 
 module.exports = new GraphQLSchema({
     query: Queries,
-    mutation: Mutations
+    mutation: Mutations,
+    subscription: SubscriptionType
 });
