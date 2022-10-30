@@ -8,6 +8,7 @@ const postSchema = new Schema({
     content: { type: String, required: true, max: 280 },
     postImage: [{ type: String, required: false }],
     postedBy: { type: String, required: true },
+    createdAt: { type: Date, default: Date.now }
 });
 
 // MODEL EXPORT

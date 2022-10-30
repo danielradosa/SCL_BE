@@ -28,7 +28,6 @@ const UserType = new GraphQLObjectType({
         profilePicture: { type: GraphQLString },
         email: { type: GraphQLString },
         handle: { type: GraphQLString },
-        password: { type: GraphQLString },
         following: { type: GraphQLInt },
         followers: { type: GraphQLInt },
         bio: {
@@ -83,6 +82,14 @@ const PostType = new GraphQLObjectType({
             type: UserType,
             resolve(parent, args) {
                 return User.findOne({ id: parent.postedBy });
+            }
+        },
+        createdAt: {
+            type: GraphQLString,
+            resolve(parent, args) {
+                const date = new Date(parent.createdAt);
+                const dateNow = date.toString();
+                return dateNow;
             }
         }
     })
@@ -209,14 +216,16 @@ const Mutations = new GraphQLObjectType({
                 title: { type: GraphQLString },
                 content: { type: GraphQLString },
                 postImage: { type: GraphQLString },
-                postedBy: { type: GraphQLString }
+                postedBy: { type: GraphQLString },
+                createdAt: { type: GraphQLString }
             },
             resolve(parent, args) {
                 let post = new Post({
                     title: args.title,
                     content: args.content,
                     postImage: args.postImage,
-                    postedBy: args.postedBy
+                    postedBy: args.postedBy,
+                    createdAt: args.createdAt
                 });
                 return post.save();
             }
