@@ -80,7 +80,7 @@ const PostType = new GraphQLObjectType({
         postedBy: {
             type: UserType,
             resolve(parent, args) {
-                return User.findOne({ id: parent.postedBy });
+                return User.findOne({ handle: parent.postedBy });
             }
         },
         createdAt: {
@@ -89,19 +89,6 @@ const PostType = new GraphQLObjectType({
                 const date = new Date(parent.createdAt);
                 const dateNow = date.toString();
                 return dateNow;
-            }
-        }
-    })
-});
-
-// Subscriptions
-const SubscriptionType = new GraphQLObjectType({
-    name: 'Subscription',
-    fields: () => ({
-        postAdded: {
-            type: PostType,
-            resolve(parent, args) {
-                return parent;
             }
         }
     })
@@ -268,6 +255,5 @@ const Mutations = new GraphQLObjectType({
 
 module.exports = new GraphQLSchema({
     query: Queries,
-    mutation: Mutations,
-    subscription: SubscriptionType
+    mutation: Mutations
 });

@@ -14,13 +14,13 @@ const signToken = (data) => {
     return jwt.sign(data, process.env.JWT_SECRET);
 };
 
-const verifyToken = (token) => {
+/* const verifyToken = (token) => {
     return jwt.verify(token, process.env.JWT_SECRET);
-}; 
+}; */
 
 module.exports = {
     hashPassword,
     verifyPassword,
     signToken,
-    verifyToken
+    // verifyToken
 };
