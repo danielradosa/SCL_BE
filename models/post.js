@@ -6,7 +6,7 @@ const Schema = mongoose.Schema;
 const postSchema = new Schema({
     title: { type: String, required: true },
     content: { type: String, required: true, max: 280 },
-    postImage: [{ type: String, required: false }],
+    postImage: { type: String, required: false },
     postedBy: { type: String, required: true },
     createdAt: { type: Date, default: Date.now }
 });
