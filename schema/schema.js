@@ -77,7 +77,7 @@ const PostType = new GraphQLObjectType({
         id: { type: GraphQLID },
         title: { type: GraphQLString },
         content: { type: GraphQLString },
-        postImage: { type: GraphQLString },
+        postImage: { type: GraphQLList },
         postedBy: {
             type: UserType,
             resolve(parent, args) {
