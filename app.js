@@ -4,7 +4,12 @@ const schema = require('./schema/schema');
 const mongoose = require('mongoose');
 const bodyParser = require("body-parser");
 const cors = require('cors');
+const { and } = require('graphql-shield');
+const user = require('./models/user');
 const cloudinary = require('cloudinary').v2;
+const applyMiddleware = require('graphql-middleware').applyMiddleware;
+const shield = require('graphql-shield').shield;
+const rule = require('graphql-shield').rule;
 
 require('dotenv').config();
 
@@ -12,11 +17,34 @@ const port = process.env.PORT || 1000;
 const db_url = process.env.MONGO_DB;
 const app = express();
 
-// Definitions
+// Definitions & CORS
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-// CORS
 app.use(cors());
+
+// Get user by ID and verify if the user is admin
+/* const isAdmin = rule()(async (parent, args, ctx, info) => {
+    const user = await User.findById(ctx.xid);
+    return user.role === 'ADMIN';
+}); */
+
+// Authenticate the user
+const isAuthenticated = rule()(async (parent, args, ctx, info) => {
+    return !!ctx.headers['authorization'];
+});
+
+// Shields
+const permissions = shield({
+    Queries: {
+        getAllPosts: isAuthenticated, 
+    },
+    Mutations: {
+        createPost: isAuthenticated,
+        createBio: isAuthenticated,
+    },
+});
+
+const schemaWithMiddleware = applyMiddleware(schema, permissions);
 
 // Setup Cloudinary
 cloudinary.config({
@@ -33,7 +61,7 @@ mongoose.connection.once('open', () => {
 
 // Start up server
 app.use('/graphql', graphqlHTTP({
-    schema,
+    schema: schemaWithMiddleware,
     graphiql: true
 }));
 

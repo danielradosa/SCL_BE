@@ -12,7 +12,7 @@ const {
 } = graphql;
 
 // Import hashing and token functions
-const { hashPassword, verifyPassword, signToken, verifyToken } = require('../utils');
+const { hashPassword, verifyPassword, signToken } = require('../utils');
 
 // Import models
 const { User, Post, Bio } = require('../models');
@@ -32,15 +32,16 @@ const UserType = new GraphQLObjectType({
         bio: {
             type: BioType,
             resolve(parent, args) {
-                return Bio.find({ id: parent.id });
+                return Bio.findOne({ bioBy: parent.id });
             }
         },
         posts: {
             type: new GraphQLList(PostType),
             resolve(parent, args) {
-                return Post.find({ postedBy: parent.id });
+                return Post.find({ postedBy: parent.handle });
             }
-        }
+        },
+        role: { type: GraphQLString } // ADMIN or USER
     })
 });
 
@@ -51,22 +52,6 @@ const LoginType = new GraphQLObjectType({
         email: { type: GraphQLString },
         password: { type: GraphQLString },
         token: { type: GraphQLString }
-    })
-});
-
-const BioType = new GraphQLObjectType({
-    name: 'Bio',
-    fields: () => ({
-        id: { type: GraphQLID },
-        who: {
-            type: UserType,
-            resolve(parent, args) {
-                return User.findById(parent.who);
-            }
-        },
-        body: { type: GraphQLString },
-        website: { type: GraphQLString },
-        location: { type: GraphQLString }
     })
 });
 
@@ -94,6 +79,22 @@ const PostType = new GraphQLObjectType({
     })
 });
 
+const BioType = new GraphQLObjectType({
+    name: 'Bio',
+    fields: () => ({
+        id: { type: GraphQLID },
+        bioBy: {
+            type: UserType,
+            resolve(parent, args) {
+                return User.findOne({ handle: parent.bioBy });
+            }
+        },
+        body: { type: GraphQLString },
+        website: { type: GraphQLString },
+        location: { type: GraphQLString }
+    })
+});
+
 // Queries
 const Queries = new GraphQLObjectType({
     name: 'Queries',
@@ -103,13 +104,6 @@ const Queries = new GraphQLObjectType({
             args: { id: { type: GraphQLID } },
             resolve(parent, args) {
                 return User.findById(args.id);
-            }
-        },
-        getBioByUserId: {
-            type: BioType,
-            args: { id: { type: GraphQLID } },
-            resolve(parent, args) {
-                return Bio.findOne({ who: args.id });
             }
         },
         getPostById: {
@@ -127,11 +121,10 @@ const Queries = new GraphQLObjectType({
         },
         getAllPosts: {
             type: new GraphQLList(PostType),
-            sort: { createdAt: -1 },
             resolve(parent, args) {
                 return Post.find({});
             }
-        }
+        },
     }
 });
 
@@ -188,22 +181,22 @@ const Mutations = new GraphQLObjectType({
         createBio: {
             type: BioType,
             args: {
-                who: { type: GraphQLID },
+                bioBy: { type: GraphQLString },
                 body: { type: GraphQLString },
                 website: { type: GraphQLString },
                 location: { type: GraphQLString }
             },
             resolve(parent, args) {
-                let bio = new Bio({
-                    who: args.who,
+                const bio = new Bio({
+                    bioBy: args.bioBy,
                     body: args.body,
                     website: args.website,
                     location: args.location
                 });
-                // Check if user has already created a bio
-                const bioExists = bio.findOne({ who: args.who });
+                const bioExists = Bio.findOne({ bioBy: args.bioBy });
+                // if bio exists, update it
                 if (bioExists) {
-                    throw new Error('User has already created a bio. If you are the creator, you can update your bio instead.');
+                    return Bio.findOneAndUpdate({ bioBy: args.bioBy }, { body: args.body, website: args.website, location: args.location });
                 } else {
                     return bio.save();
                 }
