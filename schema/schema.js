@@ -12,7 +12,7 @@ const {
 } = graphql;
 
 // Import hashing and token functions
-const { hashPassword, verifyPassword, signToken } = require('../utils');
+const { hashPassword, verifyPassword, signToken, verifyToken } = require('../utils');
 
 // Import models
 const { User, Post, Bio } = require('../models');
@@ -123,6 +123,14 @@ const Queries = new GraphQLObjectType({
             type: new GraphQLList(PostType),
             resolve(parent, args) {
                 return Post.find({});
+            }
+        },
+        getCurrentUser: {
+            type: UserType,
+            args: { token: { type: GraphQLString } },
+            async resolve(parent, args) {
+                const user = await verifyToken(args.token);
+                return User.findById(user.id);
             }
         },
     }

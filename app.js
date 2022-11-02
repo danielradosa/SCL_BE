@@ -37,6 +37,7 @@ const isAuthenticated = rule()(async (parent, args, ctx, info) => {
 const permissions = shield({
     Queries: {
         getAllPosts: isAuthenticated, 
+        getCurrentUser: isAuthenticated,
     },
     Mutations: {
         createPost: isAuthenticated,
