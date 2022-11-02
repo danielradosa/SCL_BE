@@ -119,18 +119,18 @@ const Queries = new GraphQLObjectType({
                 return User.find({});
             }
         },
-        getAllPosts: {
-            type: new GraphQLList(PostType),
-            resolve(parent, args) {
-                return Post.find({});
-            }
-        },
         getCurrentUser: {
             type: UserType,
             args: { token: { type: GraphQLString } },
             async resolve(parent, args) {
                 const user = await verifyToken(args.token);
                 return User.findById(user.id);
+            }
+        },
+        getAllPosts: {
+            type: new GraphQLList(PostType),
+            resolve(parent, args) {
+                return Post.find({});
             }
         },
     }
