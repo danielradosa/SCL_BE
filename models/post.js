@@ -1,5 +1,5 @@
 // IMPORTS
-const moment = require('moment/moment');
+const moment = require('moment');
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
