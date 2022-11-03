@@ -9,7 +9,6 @@ const postSchema = new Schema({
     postImage: { type: String, required: false },
     postedBy: { type: String, required: true },
     createdAt: { type: Date, default: Date.now },
-    role: { type: String, required: true, default: 'USER' }
 });
 
 // MODEL EXPORT
