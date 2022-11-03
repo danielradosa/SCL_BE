@@ -22,12 +22,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 
-// Get user by ID and verify if the user is admin
-/* const isAdmin = rule()(async (parent, args, ctx, info) => {
-    const user = await User.findById(ctx.xid);
-    return user.role === 'ADMIN';
-}); */
-
 // Authenticate the user
 const isAuthenticated = rule()(async (parent, args, ctx, info) => {
     return !!ctx.headers['authorization'];

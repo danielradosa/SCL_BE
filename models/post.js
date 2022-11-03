@@ -1,5 +1,4 @@
 // IMPORTS
-const moment = require('moment');
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
@@ -9,7 +8,7 @@ const postSchema = new Schema({
     content: { type: String, required: true, max: 280 },
     postImage: { type: String, required: false },
     postedBy: { type: String, required: true },
-    createdAt: { type: Date, default: moment().format('MMMM Do YYYY, h:mm:ss a'), required: true },
+    createdAt: { type: String, required: true },
 });
 
 // MODEL EXPORT
