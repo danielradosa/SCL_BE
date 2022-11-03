@@ -254,12 +254,20 @@ const Mutations = new GraphQLObjectType({
         deletePost: {
             type: PostType,
             args: {
-                id: { type: GraphQLID }
+                id: { type: GraphQLID },
+                token: { type: GraphQLString }
             },
-            resolve(parent, args) {
-                return Post.findByIdAndDelete(args.id);
+            async resolve(parent, args) {
+                const user = await verifyToken(args.token);
+                const post = await Post.findById(args.id);
+                if (!post) {
+                    throw new Error('Post does not exist');
+                } else if (post.postedBy !== user.handle) {
+                    throw new Error('You are not authorized to delete this post');
+                } else {
+                    return Post.findByIdAndDelete(args.id);
+                }
             }
-        },
     }
 });
 
