@@ -251,6 +251,15 @@ const Mutations = new GraphQLObjectType({
                 }
             }
         },
+        deletePost: {
+            type: PostType,
+            args: {
+                id: { type: GraphQLID }
+            },
+            resolve(parent, args) {
+                return Post.findByIdAndDelete(args.id);
+            }
+        },
     }
 });
 
