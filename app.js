@@ -35,7 +35,7 @@ const permissions = shield({
     },
     Mutations: {
         createPost: isAuthenticated,
-        deletePost: isAuthenticated,
+        deletePostById: isAuthenticated,
         createBio: isAuthenticated,
     },
 });
