@@ -146,7 +146,8 @@ const Mutations = new GraphQLObjectType({
                 username: { type: GraphQLString },
                 email: { type: GraphQLString },
                 handle: { type: GraphQLString },
-                password: { type: GraphQLString }
+                password: { type: GraphQLString },
+                role: { type: GraphQLString }
             },
             async resolve(parent, args) {
                 const hashedPassword = await hashPassword(args.password);
@@ -154,7 +155,8 @@ const Mutations = new GraphQLObjectType({
                     username: args.username,
                     email: args.email,
                     handle: args.handle,
-                    password: hashedPassword
+                    password: hashedPassword,
+                    role: args.role
                 });
                 // Check if user with email or handle already exists
                 const userExists = await User.findOne({ $or: [{ email: args.email }, { handle: args.handle }] });
