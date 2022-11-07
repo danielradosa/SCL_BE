@@ -9,8 +9,8 @@ const userSchema = new Schema({
     email: { type: String, required: true, min: 6, max: 255 },
     handle: { type: String, required: true, min: 4, max: 25 },
     password: { type: String, required: true, min: 6 },
-    following: { type: Number, required: false },
-    followers: { type: Number, required: false },
+    following: [{ type: String, required: false }],
+    followers: [{ type: String, required: false }],
     bio: { type: String, required: false },
     posts: [{
         type: Schema.Types.ObjectId,

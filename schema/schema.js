@@ -7,7 +7,6 @@ const {
     GraphQLString,
     GraphQLSchema,
     GraphQLID,
-    GraphQLInt,
     GraphQLList
 } = graphql;
 
@@ -27,8 +26,8 @@ const UserType = new GraphQLObjectType({
         password: { type: GraphQLString },
         profilePicture: { type: GraphQLString },
         handle: { type: GraphQLString },
-        following: { type: GraphQLInt },
-        followers: { type: GraphQLInt },
+        following: { type: new GraphQLList(GraphQLString) },
+        followers: { type: new GraphQLList(GraphQLString) },
         bio: {
             type: BioType,
             resolve(parent, args) {
@@ -258,6 +257,42 @@ const Mutations = new GraphQLObjectType({
             args: { id: { type: GraphQLID } },
             resolve(parent, args) {
                 return Post.findByIdAndDelete(args.id);
+            }
+        },
+        followOrUnfollowUser: {
+            type: UserType,
+            args: {
+                id: { type: GraphQLID },
+                handle: { type: GraphQLString }
+            },
+            async resolve(parent, args) {
+                const user = await User.findById(args.id);
+                if (!user) {
+                    throw new Error('User does not exist');
+                } else {
+                    const userToFollow = await User.findOne({ handle: args.handle });
+                    if (!userToFollow) {
+                        throw new Error('User does not exist');
+                    } else {
+                        // check if user is already following the user
+                        const isFollowing = user.following.includes(args.handle);
+                        if (isFollowing) {
+                            // remove user from following array
+                            user.following = user.following.filter(following => following !== args.handle);
+                            // remove user from followers array
+                            userToFollow.followers = userToFollow.followers.filter(follower => follower !== user.handle);
+                            await user.save();
+                            return userToFollow.save();
+                        } else {
+                            // add user to following array
+                            user.following.push(args.handle);
+                            // add user to followers array
+                            userToFollow.followers.push(user.handle);
+                            await user.save();
+                            return userToFollow.save();
+                        }
+                    }
+                }
             }
         },
     }
