@@ -37,6 +37,7 @@ const permissions = shield({
         createPost: isAuthenticated,
         deletePostById: isAuthenticated,
         createBio: isAuthenticated,
+        updateProfile: isAuthenticated,
     },
 });
 
