@@ -7,7 +7,8 @@ const {
     GraphQLString,
     GraphQLSchema,
     GraphQLID,
-    GraphQLList
+    GraphQLList,
+    GraphQLBoolean,
 } = graphql;
 
 // Import hashing and token functions
@@ -28,6 +29,7 @@ const UserType = new GraphQLObjectType({
         handle: { type: GraphQLString },
         following: { type: new GraphQLList(GraphQLString) },
         followers: { type: new GraphQLList(GraphQLString) },
+        artist: { type: GraphQLBoolean },
         bio: {
             type: BioType,
             resolve(parent, args) {

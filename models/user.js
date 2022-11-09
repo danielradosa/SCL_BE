@@ -12,6 +12,7 @@ const userSchema = new Schema({
     following: [{ type: String, required: false }],
     followers: [{ type: String, required: false }],
     bio: { type: String, required: false },
+    artist: { type: Boolean, required: false, default: false },
     posts: [{
         type: Schema.Types.ObjectId,
         ref: 'Post'
