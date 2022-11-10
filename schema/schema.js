@@ -9,6 +9,7 @@ const {
     GraphQLID,
     GraphQLList,
     GraphQLBoolean,
+    GraphQLInt,
 } = graphql;
 
 // Import hashing and token functions
@@ -76,7 +77,13 @@ const PostType = new GraphQLObjectType({
                 const dateNow = date.toString();
                 return dateNow;
             }
-        }
+        },
+        likedBy: {
+            type: new GraphQLList(UserType),
+            resolve(parent, args) {
+                return User.find({ _id: { $in: parent.likedBy } });
+            }
+        },
     })
 });
 
@@ -189,6 +196,26 @@ const Mutations = new GraphQLObjectType({
                 }
             }
         },
+        likePost: {
+            type: PostType,
+            args: {
+                id: { type: GraphQLID },
+                token: { type: GraphQLString }
+            },
+            async resolve(parent, args) {
+                const user = await verifyToken(args.token);
+                const post = await Post.findById(args.id);
+                if (!post) {
+                    throw new Error('Post does not exist');
+                }
+                if (post.likedBy.includes(user.id)) {
+                    throw new Error('Post already liked');
+                } else {
+                    post.likedBy.push(user.id);
+                    return post.save();
+                }
+            }
+        },
         updateProfile: {
             type: UserType,
             args: {
@@ -238,6 +265,27 @@ const Mutations = new GraphQLObjectType({
                 }
             }
         },
+        likePost: {
+            type: PostType,
+            args: {
+                id: { type: GraphQLID },
+                token: { type: GraphQLString }
+            },
+            async resolve(parent, args) {
+                const user = await verifyToken(args.token);
+                const post = await Post.findById(args.id);
+                if (!post) {
+                    throw new Error('Post does not exist');
+                }
+                if (post.likedBy.includes(user.id)) {
+                    post.likedBy = post.likedBy.filter(like => like !== user.id);
+                    return post.save();
+                } else {
+                    post.likedBy.push(user.id);
+                    return post.save();
+                }
+            }
+        },
         createPost: {
             type: PostType,
             args: {
@@ -245,7 +293,8 @@ const Mutations = new GraphQLObjectType({
                 content: { type: GraphQLString },
                 postImage: { type: GraphQLString },
                 postedBy: { type: GraphQLString },
-                createdAt: { type: GraphQLString }
+                createdAt: { type: GraphQLString },
+                likes: { type: GraphQLInt },
             },
             resolve(parent, args) {
                 let post = new Post({
@@ -253,7 +302,8 @@ const Mutations = new GraphQLObjectType({
                     content: args.content,
                     postImage: args.postImage,
                     postedBy: args.postedBy,
-                    createdAt: args.createdAt
+                    createdAt: args.createdAt,
+                    likes: args.likes
                 });
                 return post.save();
             }
@@ -269,13 +319,7 @@ const Mutations = new GraphQLObjectType({
                 if (!user) {
                     throw new Error('User does not exist');
                 } else {
-                    const path = require('path');
-                    const mainDir = path.join(__dirname, '../uploads/');
-                    filename = mainDir + args.profilePicture;
-                    // upload profile picture with cloudinary
-                    const result = await cloudinary.uploader.upload(filename);
-                    user.profilePicture = result.secure_url;
-                    return user.save();
+                    return User.findByIdAndUpdate(args.id, { profilePicture: args.profilePicture }, { new: true });
                 }
             }
         },

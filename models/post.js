@@ -10,6 +10,7 @@ const postSchema = new Schema({
     postImage: { type: String, required: false },
     postedBy: { type: String, required: true },
     createdAt: { type: String, required: true, default: moment().format('MM-DD-YYYY hh:mm:ss a') },
+    likedBy: { type: Array, required: false },
 });
 
 // MODEL EXPORT
