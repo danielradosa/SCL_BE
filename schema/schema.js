@@ -53,8 +53,18 @@ const LoginType = new GraphQLObjectType({
         id: { type: GraphQLID },
         email: { type: GraphQLString },
         password: { type: GraphQLString },
-        handle: { type: GraphQLString },
-        profilePicture: { type: GraphQLString },
+        handle: {
+            type: GraphQLString,
+            resolve(parent, args) {
+                return User.findOne({ email: parent.email }).handle;
+            }
+        },
+        profilePicture: {
+            type: GraphQLString,
+            resolve(parent, args) {
+                return User.findOne({ email: parent.email }).profilePicture;
+            }
+        },
         token: { type: GraphQLString }
     })
 });
