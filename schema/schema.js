@@ -47,28 +47,6 @@ const UserType = new GraphQLObjectType({
     })
 });
 
-const LoginType = new GraphQLObjectType({
-    name: 'Login',
-    fields: () => ({
-        id: { type: GraphQLID },
-        email: { type: GraphQLString },
-        password: { type: GraphQLString },
-        handle: {
-            type: GraphQLString,
-            resolve(parent, args) {
-                return User.findOne({ email: parent.email }).handle;
-            }
-        },
-        profilePicture: {
-            type: GraphQLString,
-            resolve(parent, args) {
-                return User.findOne({ email: parent.email }).profilePicture;
-            }
-        },
-        token: { type: GraphQLString }
-    })
-});
-
 const PostType = new GraphQLObjectType({
     name: 'Post',
     fields: () => ({
@@ -112,6 +90,22 @@ const BioType = new GraphQLObjectType({
         body: { type: GraphQLString },
         website: { type: GraphQLString },
         location: { type: GraphQLString }
+    })
+});
+
+const LoginType = new GraphQLObjectType({
+    name: 'Login',
+    fields: () => ({
+        id: { type: GraphQLString },
+        email: { type: GraphQLString },
+        password: { type: GraphQLString },
+        allUserInfo: {
+            type: UserType,
+            resolve(parent, args) {
+                return User.findOne({ email: parent.email });
+            }
+        },
+        token: { type: GraphQLString }
     })
 });
 
@@ -191,8 +185,7 @@ const Mutations = new GraphQLObjectType({
             type: LoginType,
             args: {
                 email: { type: GraphQLString },
-                password: { type: GraphQLString },
-                token: { type: GraphQLString }
+                password: { type: GraphQLString }
             },
             async resolve(parent, args) {
                 const user = await User.findOne({ email: args.email });
@@ -204,7 +197,7 @@ const Mutations = new GraphQLObjectType({
                     throw new Error('Incorrect password');
                 } else {
                     const token = signToken({ id: user.id });
-                    return { email: user.email, password: user.password, token: token };
+                    return { email: user.email, password: user.password, token: token, ...user._doc };
                 }
             }
         },
