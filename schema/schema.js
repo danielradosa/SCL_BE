@@ -147,6 +147,19 @@ const Queries = new GraphQLObjectType({
                 return Post.find({});
             }
         },
+        searchPosts: {
+            type: new GraphQLList(PostType),
+            args: { search: { type: GraphQLString } },
+            resolve(parent, args) {
+                return Post.find({ 
+                    // if search is in title or content
+                    $or: [
+                        { title: { $regex: args.search, $options: 'i' } },
+                        { content: { $regex: args.search, $options: 'i' } }
+                    ]
+                });
+            }
+        },
     }
 });
 
@@ -228,6 +241,8 @@ const Mutations = new GraphQLObjectType({
                 username: { type: GraphQLString },
                 email: { type: GraphQLString },
                 handle: { type: GraphQLString },
+                profilePicture: { type: GraphQLString },
+                bio: { type: GraphQLString },
             },
             async resolve(parent, args) {
                 const user = await User.findById(args.id);
@@ -241,7 +256,9 @@ const Mutations = new GraphQLObjectType({
                     return User.findByIdAndUpdate(args.id, {
                         username: args.username,
                         email: args.email,
-                        handle: args.handle
+                        handle: args.handle,
+                        profilePicture: args.profilePicture,
+                        bio: args.bio
                     }, { new: true });
                 }
             }
