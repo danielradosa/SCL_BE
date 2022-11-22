@@ -30,7 +30,8 @@ const isAuthenticated = rule()(async (parent, args, ctx, info) => {
 // Shields
 const permissions = shield({
     Queries: {
-        getAllPosts: isAuthenticated, 
+        getAllPosts: isAuthenticated,
+        getAllUsers: isAuthenticated, 
         getCurrentUser: isAuthenticated,
         searchPosts: isAuthenticated,
     },
@@ -38,8 +39,10 @@ const permissions = shield({
         createPost: isAuthenticated,
         likePost: isAuthenticated,
         deletePostById: isAuthenticated,
-        createBio: isAuthenticated,
+        createOrUpdateBio: isAuthenticated,
         updateProfile: isAuthenticated,
+        uploadProfilePicture: isAuthenticated,
+        deleteAccount: isAuthenticated,
     },
 });
 

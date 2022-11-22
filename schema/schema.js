@@ -151,7 +151,7 @@ const Queries = new GraphQLObjectType({
             type: new GraphQLList(PostType),
             args: { search: { type: GraphQLString } },
             resolve(parent, args) {
-                return Post.find({ 
+                return Post.find({
                     // if search is in title or content
                     $or: [
                         { title: { $regex: args.search, $options: 'i' } },
@@ -239,10 +239,7 @@ const Mutations = new GraphQLObjectType({
             args: {
                 id: { type: GraphQLID },
                 username: { type: GraphQLString },
-                email: { type: GraphQLString },
-                handle: { type: GraphQLString },
                 profilePicture: { type: GraphQLString },
-                bio: { type: GraphQLString },
             },
             async resolve(parent, args) {
                 const user = await User.findById(args.id);
@@ -253,17 +250,13 @@ const Mutations = new GraphQLObjectType({
                 if (userExists) {
                     throw new Error('User with such handle or email already exists. Please choose another.');
                 } else {
-                    return User.findByIdAndUpdate(args.id, {
-                        username: args.username,
-                        email: args.email,
-                        handle: args.handle,
-                        profilePicture: args.profilePicture,
-                        bio: args.bio
-                    }, { new: true });
+                    user.username = args.username;
+                    user.profilePicture = args.profilePicture;
+                    return user.save();
                 }
             }
         },
-        createBio: {
+        createOrUpdateBio: {
             type: BioType,
             args: {
                 bioBy: { type: GraphQLString },
@@ -388,6 +381,23 @@ const Mutations = new GraphQLObjectType({
                 }
             }
         },
+        deleteAccount: {
+            type: UserType,
+            args: {
+                id: { type: GraphQLID }
+            },
+            async resolve(parent, args) {
+                const user = await User.findById(args.id);
+                if (!user) {
+                    throw new Error('User does not exist');
+                } else {
+                    // delete all posts by user
+                    await Post.deleteMany({ postedBy: user.handle });
+                    // delete user
+                    return User.findByIdAndDelete(args.id);
+                }
+            }   
+        }
     }
 });
 
