@@ -234,24 +234,38 @@ const Mutations = new GraphQLObjectType({
                 }
             }
         },
-        updateProfile: {
+        updateUsername: {
             type: UserType,
             args: {
                 id: { type: GraphQLID },
                 username: { type: GraphQLString },
-                profilePicture: { type: GraphQLString },
+                token: { type: GraphQLString }
             },
             async resolve(parent, args) {
-                const user = await User.findById(args.id);
-                if (!user) {
-                    throw new Error('User does not exist');
-                }
-                const userExists = await User.findOne({ $or: [{ email: args.email }, { handle: args.handle }] });
+                const user = await verifyToken(args.token);
+                const userExists = await
+                User.findOne({ $or: [{ email: args.email }, { handle: args.handle }] });
                 if (userExists) {
                     throw new Error('User with such handle or email already exists. Please choose another.');
                 } else {
-                    user.username = args.username;
-                    user.profilePicture = args.profilePicture;
+                    return user.save();
+                }
+            }
+        },
+        updateEmail: {
+            type: UserType,
+            args: {
+                id: { type: GraphQLID },
+                email: { type: GraphQLString },
+                token: { type: GraphQLString }
+            },
+            async resolve(parent, args) {
+                const user = await verifyToken(args.token);
+                const userExists = await
+                User.findOne({ $or: [{ email: args.email }, { handle: args.handle }] });
+                if (userExists) {
+                    throw new Error('User with such handle or email already exists. Please choose another.');
+                } else {
                     return user.save();
                 }
             }

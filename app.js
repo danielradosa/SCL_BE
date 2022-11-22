@@ -40,9 +40,10 @@ const permissions = shield({
         likePost: isAuthenticated,
         deletePostById: isAuthenticated,
         createOrUpdateBio: isAuthenticated,
-        updateProfile: isAuthenticated,
         uploadProfilePicture: isAuthenticated,
         deleteAccount: isAuthenticated,
+        updateUsername: isAuthenticated,
+        updateEmail: isAuthenticated,
     },
 });
 
