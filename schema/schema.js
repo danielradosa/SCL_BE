@@ -243,13 +243,15 @@ const Mutations = new GraphQLObjectType({
             },
             async resolve(parent, args) {
                 const user = await verifyToken(args.token);
-                const userExists = await
-                User.findOne({ $or: [{ email: args.email }, { handle: args.handle }] });
+                const userExists = await User.findOne ({ username: args.username });
                 if (userExists) {
-                    throw new Error('User with such handle or email already exists. Please choose another.');
-                } else {
-                    return user.save();
+                    throw new Error('Username already taken');
                 }
+                if (user.id !== args.id) {
+                    throw new Error('You are not authorized to update this user');
+                }
+                return User.findByIdAndUpdate
+                (args.id, { username: args.username }, { new: true });
             }
         },
         updateEmail: {
@@ -261,13 +263,15 @@ const Mutations = new GraphQLObjectType({
             },
             async resolve(parent, args) {
                 const user = await verifyToken(args.token);
-                const userExists = await
-                User.findOne({ $or: [{ email: args.email }, { handle: args.handle }] });
+                const userExists = await User.findOne ({ email: args.email });
                 if (userExists) {
-                    throw new Error('User with such handle or email already exists. Please choose another.');
-                } else {
-                    return user.save();
+                    throw new Error('Email already taken');
                 }
+                if (user.id !== args.id) {
+                    throw new Error('You are not authorized to update this user');
+                }
+                return User.findByIdAndUpdate
+                (args.id, { email: args.email }, { new: true });
             }
         },
         createOrUpdateBio: {
