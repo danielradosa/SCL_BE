@@ -147,12 +147,19 @@ const Queries = new GraphQLObjectType({
                 return Post.find({});
             }
         },
+        getAllPostsByUser: {
+            type: new GraphQLList(PostType),
+            args: { handle: { type: GraphQLString } },
+            resolve(parent, args) {
+                return Post.find({ postedBy: args.handle });
+            }
+        },
         searchPosts: {
             type: new GraphQLList(PostType),
             args: { search: { type: GraphQLString } },
             resolve(parent, args) {
                 return Post.find({
-                    // if search is in title or content
+                    // search is in title or content
                     $or: [
                         { title: { $regex: args.search, $options: 'i' } },
                         { content: { $regex: args.search, $options: 'i' } }

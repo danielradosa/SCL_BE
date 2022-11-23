@@ -40,14 +40,6 @@ type Post {
     comments: [Comment!] @hasInverse(field: commentedOn)
 }
 
-type Comment {
-    id: ID!
-    body: String!
-    createdAt: DateTime
-    commentedOn: Post!
-    commentedBy: User!
-}
-
 type Like {
     id: ID!
     createdAt: DateTime
@@ -66,18 +58,6 @@ input PostInput {
     body: String!
     postImageURL: [String]
     postedBy: String!
-}
-
-input CommentInput {
-    body: String!
-    commentedOn: ID!
-    commentedBy: String!
-    timestamp: DateTime!
-}
-
-input LikeInput {
-    likedOn: ID!
-    likedBy: String!
 }
 
 input LoginInput {
