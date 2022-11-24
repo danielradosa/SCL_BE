@@ -406,6 +406,31 @@ const Mutations = new GraphQLObjectType({
                 }
             }
         },
+        toggleArtist: {
+            type: UserType,
+            args: {
+                id: { type: GraphQLID },
+            },
+            async resolve(parent, args) {
+                const user = await User.findById(args.id);
+                if (!user) {
+                    throw new Error('User does not exist');
+                } else {
+                    const isArtist = user.artist;
+                    if (isArtist) {
+                        user.artist = false;
+                        await user.save();
+                        return user;
+                    }
+                    else {
+                        // add user to artists array
+                        user.artist = true;
+                        await user.save();
+                        return user;
+                    }
+                }
+            }
+        },
         deleteAccount: {
             type: UserType,
             args: {
