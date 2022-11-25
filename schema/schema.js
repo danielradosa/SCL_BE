@@ -143,8 +143,11 @@ const Queries = new GraphQLObjectType({
         },
         getAllPosts: {
             type: new GraphQLList(PostType),
+            args: {
+                limit: { type: GraphQLInt },
+            },
             resolve(parent, args) {
-                return Post.find({});
+                return Post.find({}).sort({ createdAt: -1 }).limit(args.limit);
             }
         },
         getAllPostsByUser: {
