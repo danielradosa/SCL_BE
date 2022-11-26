@@ -34,6 +34,9 @@ const permissions = shield({
         getAllUsers: isAuthenticated, 
         getCurrentUser: isAuthenticated,
         searchPosts: isAuthenticated,
+        getAllArtists: isAuthenticated,
+        getMostLikedPosts: isAuthenticated,
+        getMostFollowedUsers: isAuthenticated,
     },
     Mutations: {
         createPost: isAuthenticated,

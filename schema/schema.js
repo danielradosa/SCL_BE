@@ -171,6 +171,32 @@ const Queries = new GraphQLObjectType({
                 });
             }
         },
+        getAllArtists: {
+            type: new GraphQLList(UserType),
+            resolve(parent, args) {
+                return User.find({ artist: true });
+            }
+        },
+        getMostLikedPosts: {
+            type: new GraphQLList(PostType),
+            args: {
+                limit: { type: GraphQLInt },
+                offset: { type: GraphQLInt }
+            },
+            resolve(parent, args) {
+                return Post.find({}).sort({ likedBy: -1 }).limit(args.limit).skip(args.offset);
+            }
+        },
+        getMostFollowedUsers: {
+            args: {
+                limit: { type: GraphQLInt },
+                offset: { type: GraphQLInt }
+            },
+            type: new GraphQLList(UserType),
+            resolve(parent, args) {
+                return User.find({}).sort({ followers: -1 }).limit(args.limit).skip(args.offset);
+            }
+        },
     }
 });
 
