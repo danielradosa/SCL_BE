@@ -47,6 +47,22 @@ const UserType = new GraphQLObjectType({
     })
 });
 
+const BioType = new GraphQLObjectType({
+    name: 'Bio',
+    fields: () => ({
+        id: { type: GraphQLID },
+        bioBy: {
+            type: UserType,
+            resolve(parent, args) {
+                return User.findOne({ id: parent.bioBy });
+            }
+        },
+        body: { type: GraphQLString },
+        website: { type: GraphQLString },
+        location: { type: GraphQLString }
+    })
+});
+
 const PostType = new GraphQLObjectType({
     name: 'Post',
     fields: () => ({
@@ -74,22 +90,6 @@ const PostType = new GraphQLObjectType({
                 return User.find({ _id: { $in: parent.likedBy } });
             }
         },
-    })
-});
-
-const BioType = new GraphQLObjectType({
-    name: 'Bio',
-    fields: () => ({
-        id: { type: GraphQLID },
-        bioBy: {
-            type: UserType,
-            resolve(parent, args) {
-                return User.findOne({ handle: parent.bioBy });
-            }
-        },
-        body: { type: GraphQLString },
-        website: { type: GraphQLString },
-        location: { type: GraphQLString }
     })
 });
 
@@ -197,6 +197,14 @@ const Queries = new GraphQLObjectType({
                 return User.find({}).sort({ followers: -1 }).limit(args.limit).skip(args.offset);
             }
         },
+        getCurrentUserBio: {
+            type: BioType,
+            args: { token: { type: GraphQLString } },
+            async resolve(parent, args) {
+                const user = await verifyToken(args.token);
+                return Bio.findOne({ bioBy: user.id });
+            }
+        },
     }
 });
 
@@ -280,7 +288,7 @@ const Mutations = new GraphQLObjectType({
             },
             async resolve(parent, args) {
                 const user = await verifyToken(args.token);
-                const userExists = await User.findOne ({ username: args.username });
+                const userExists = await User.findOne({ username: args.username });
                 if (userExists) {
                     throw new Error('Username already taken');
                 }
@@ -288,7 +296,7 @@ const Mutations = new GraphQLObjectType({
                     throw new Error('You are not authorized to update this user');
                 }
                 return User.findByIdAndUpdate
-                (args.id, { username: args.username }, { new: true });
+                    (args.id, { username: args.username }, { new: true });
             }
         },
         updateEmail: {
@@ -300,7 +308,7 @@ const Mutations = new GraphQLObjectType({
             },
             async resolve(parent, args) {
                 const user = await verifyToken(args.token);
-                const userExists = await User.findOne ({ email: args.email });
+                const userExists = await User.findOne({ email: args.email });
                 if (userExists) {
                     throw new Error('Email already taken');
                 }
@@ -308,31 +316,7 @@ const Mutations = new GraphQLObjectType({
                     throw new Error('You are not authorized to update this user');
                 }
                 return User.findByIdAndUpdate
-                (args.id, { email: args.email }, { new: true });
-            }
-        },
-        createOrUpdateBio: {
-            type: BioType,
-            args: {
-                bioBy: { type: GraphQLString },
-                body: { type: GraphQLString },
-                website: { type: GraphQLString },
-                location: { type: GraphQLString }
-            },
-            resolve(parent, args) {
-                const bio = new Bio({
-                    bioBy: args.bioBy,
-                    body: args.body,
-                    website: args.website,
-                    location: args.location
-                });
-                const bioExists = Bio.findOne({ bioBy: args.bioBy });
-                // if bio exists, update it
-                if (bioExists) {
-                    return Bio.findOneAndUpdate({ bioBy: args.bioBy }, { body: args.body, website: args.website, location: args.location });
-                } else {
-                    return bio.save();
-                }
+                    (args.id, { email: args.email }, { new: true });
             }
         },
         likePost: {
@@ -476,8 +460,39 @@ const Mutations = new GraphQLObjectType({
                     // delete user
                     return User.findByIdAndDelete(args.id);
                 }
-            }   
-        }
+            }
+        },
+        // create bio and link to user
+        createOrUpdateBio: {
+            type: BioType,
+            args: {
+                bioBy: { type: GraphQLString },
+                body: { type: GraphQLString },
+                location: { type: GraphQLString },
+                website: { type: GraphQLString },
+            },
+            async resolve(parent, args) {
+                const bio = await Bio.findOne({ bioBy: args.bioBy });
+                const user = await User.findOne({ bio: args.id });
+
+                // if user has empty bio field in user model then create bio
+                if (!user.bio && !bio) {
+                    const newBio = new Bio({
+                        bioBy: args.bioBy,
+                        body: args.body,
+                        location: args.location,
+                        website: args.website
+                    });
+                    const bio = await newBio.save();
+                    user.bio = bio.id;
+                    await user.save();
+                    return bio;
+                } else {
+                    // if user has bio field in user model then update bio
+                    return Bio.findOneAndUpdate({ bioBy: args.bioBy }, { body: args.body, location: args.location, website: args.website });
+                }
+            }
+        },
     }
 });
 
