@@ -327,21 +327,22 @@ const Mutations = new GraphQLObjectType({
                 website: { type: GraphQLString },
                 location: { type: GraphQLString }
             },
-            resolve(parent, args) {
-                const bio = new Bio({
-                    bioBy: args.bioBy,
-                    body: args.body,
-                    website: args.website,
-                    location: args.location
-                });
-                const bioExists = Bio.findOne({ bioBy: args.bioBy });
-                // if bio exists, update it
-                if (bioExists) {
-                    return Bio.findOneAndUpdate({ bioBy: args.bioBy }, { body: args.body, website: args.website, location: args.location });
+            async resolve(parent, args) {
+                // check if usertype has a bio field with bio id
+                const user = await User.findById(args.bioBy);
+                if (user.bio) {
+                    // if bio exists, update it
+                    return Bio.findByIdAndUpdate(user.bio, args, { new: true });
                 } else {
-                    return bio.save();
+                    // if bio does not exist, create it
+                    const bio = new Bio(args);
+                    const bioSaved = await bio.save();
+                    user.bio = bioSaved.id;
+                    user.save();
+                    return bioSaved;
                 }
             }
+
         },
         likePost: {
             type: PostType,
