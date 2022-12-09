@@ -13,9 +13,4 @@
 2. Mongoose
 3. Express
 4. Node
-
-#### To implement
-1. Comment type / model
-2. Follower type / model
-3. Like type / model
-4. Subscription to these models
+5. Cloudinary
