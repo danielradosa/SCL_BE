@@ -7,7 +7,7 @@ const bioSchema = new Schema({
     bioBy: { type: String, required: true },
     body: { type: String, required: false, max: 160 },
     website: { type: String, required: false, max: 255 },
-    location: { type: String, required: false },
+    location: { type: String, required: false, max: 48 },
 });
 
 // MODEL EXPORT

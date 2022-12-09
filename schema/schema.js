@@ -1,6 +1,6 @@
 // Imports
 const graphql = require('graphql');
-const cloudinary = require('cloudinary').v2;
+//const cloudinary = require('cloudinary').v2;
 const _ = require('lodash');
 const {
     GraphQLObjectType,
@@ -204,7 +204,7 @@ const Queries = new GraphQLObjectType({
                 const user = await verifyToken(args.token);
                 return Bio.findOne({ bioBy: user.id });
             }
-        },
+        }
     }
 });
 
@@ -317,6 +317,30 @@ const Mutations = new GraphQLObjectType({
                 }
                 return User.findByIdAndUpdate
                     (args.id, { email: args.email }, { new: true });
+            }
+        },
+        createOrUpdateBio: {
+            type: BioType,
+            args: {
+                bioBy: { type: GraphQLString },
+                body: { type: GraphQLString },
+                website: { type: GraphQLString },
+                location: { type: GraphQLString }
+            },
+            resolve(parent, args) {
+                const bio = new Bio({
+                    bioBy: args.bioBy,
+                    body: args.body,
+                    website: args.website,
+                    location: args.location
+                });
+                const bioExists = Bio.findOne({ bioBy: args.bioBy });
+                // if bio exists, update it
+                if (bioExists) {
+                    return Bio.findOneAndUpdate({ bioBy: args.bioBy }, { body: args.body, website: args.website, location: args.location });
+                } else {
+                    return bio.save();
+                }
             }
         },
         likePost: {
@@ -461,38 +485,7 @@ const Mutations = new GraphQLObjectType({
                     return User.findByIdAndDelete(args.id);
                 }
             }
-        },
-        // create bio and link to user
-        createOrUpdateBio: {
-            type: BioType,
-            args: {
-                bioBy: { type: GraphQLString },
-                body: { type: GraphQLString },
-                location: { type: GraphQLString },
-                website: { type: GraphQLString },
-            },
-            async resolve(parent, args) {
-                const bio = await Bio.findOne({ bioBy: args.bioBy });
-                const user = await User.findOne({ bio: args.id });
-
-                // if user has empty bio field in user model then create bio
-                if (!user.bio && !bio) {
-                    const newBio = new Bio({
-                        bioBy: args.bioBy,
-                        body: args.body,
-                        location: args.location,
-                        website: args.website
-                    });
-                    const bio = await newBio.save();
-                    user.bio = bio.id;
-                    await user.save();
-                    return bio;
-                } else {
-                    // if user has bio field in user model then update bio
-                    return Bio.findOneAndUpdate({ bioBy: args.bioBy }, { body: args.body, location: args.location, website: args.website });
-                }
-            }
-        },
+        }
     }
 });
 
