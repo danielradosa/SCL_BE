@@ -259,26 +259,6 @@ const Mutations = new GraphQLObjectType({
                 }
             }
         },
-        likePost: {
-            type: PostType,
-            args: {
-                id: { type: GraphQLID },
-                token: { type: GraphQLString }
-            },
-            async resolve(parent, args) {
-                const user = await verifyToken(args.token);
-                const post = await Post.findById(args.id);
-                if (!post) {
-                    throw new Error('Post does not exist');
-                }
-                if (post.likedBy.includes(user.id)) {
-                    throw new Error('Post already liked');
-                } else {
-                    post.likedBy.push(user.id);
-                    return post.save();
-                }
-            }
-        },
         updateUsername: {
             type: UserType,
             args: {
@@ -344,7 +324,7 @@ const Mutations = new GraphQLObjectType({
             }
 
         },
-        likePost: {
+        likeOrDislikePost: {
             type: PostType,
             args: {
                 id: { type: GraphQLID },

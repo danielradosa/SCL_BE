@@ -41,7 +41,7 @@ const permissions = shield({
     },
     Mutations: {
         createPost: isAuthenticated,
-        likePost: isAuthenticated,
+        likeOrDislikePost: isAuthenticated,
         deletePostById: isAuthenticated,
         uploadProfilePicture: isAuthenticated,
         deleteAccount: isAuthenticated,
