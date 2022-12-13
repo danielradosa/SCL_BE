@@ -322,7 +322,6 @@ const Mutations = new GraphQLObjectType({
                     return bioSaved;
                 }
             }
-
         },
         likeOrDislikePost: {
             type: PostType,
